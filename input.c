@@ -6,67 +6,71 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/21 16:40:45 by hcaterpi          #+#    #+#             */
-/*   Updated: 2019/10/01 12:51:39 by htrent           ###   ########.fr       */
+/*   Updated: 2019/10/12 17:16:02 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fillit.h"
 
-void	display_message(int signal)
+static void		init_valid(t_valid *v)
 {
-	if (signal == 1)
+	v->connects = 0;
+	v->sharps = 0;
+	v->dots = 0;
+	v->i = -1;
+}
+
+int				display_message(int signal)
+{
+	if (signal < 0 || signal > 26)
 		write(1, "error\n", 6);
 	else if (signal == 0)
 		write(1, "usage: ./fillit source_file\n", 28);
+	return (1);
 }
 
-int		check_around(char *tetrimino, int i)
+static int		check_around(char *tetrimino, int i)
 {
+	int connects;
+
+	connects = 0;
 	if ((i - 4) % 5 == 0 || i == 20)
-		return (1);
-	else if (i % 5 != 0 && tetrimino[i - 1] == '#')
 		return (0);
-	else if ((i - 3) % 5 != 0 && tetrimino[i + 1] == '#')
-		return (0);
-	else if (i > 3 && tetrimino[i - 5] == '#')
-		return (0);
-	else if (i < 13 && tetrimino[i + 5] == '#')
-		return (0);
-	else
-		return (1);
+	if (i % 5 != 0 && tetrimino[i - 1] == '#')
+		connects++;
+	if ((i - 3) % 5 != 0 && tetrimino[i + 1] == '#')
+		connects++;
+	if (i > 3 && tetrimino[i - 5] == '#')
+		connects++;
+	if (i < 14 && tetrimino[i + 5] == '#')
+		connects++;
+	return (connects);
 }
 
-int		validation(char *tetrimino, int byte_read)
+int				validation(char *tetrimino, int byte_read)
 {
-	int		sharps;
-	int		dots;
-	int		i;
+	t_valid v;
 
-	if (byte_read < 19)
-		return (1);
-	sharps = 0;
-	dots = 0;
-	i = 0;
-	while (i < byte_read)
-	{
-		if (tetrimino[i] == '\n')
+	init_valid(&v);
+	while (++v.i < byte_read)
+		if (tetrimino[v.i] == '\n')
 		{
-			if ((i - 4) % 5 != 0 && i != 20)
+			if ((v.i - 4) % 5 != 0 && v.i != 20)
 				return (1);
 		}
-		else if (tetrimino[i] == '#')
+		else if (tetrimino[v.i] == '#')
 		{
-			if (check_around(tetrimino, i))
+			v.ret = check_around(tetrimino, v.i);
+			if (!v.ret)
 				return (1);
-			sharps++;
+			v.connects += v.ret;
+			v.sharps++;
 		}
-		else if (tetrimino[i] == '.')
-			dots++;
+		else if (tetrimino[v.i] == '.')
+			v.dots++;
 		else
 			return (1);
-		i++;
-	}
-	if (sharps != 4 || dots != 12)
+	if (v.sharps != 4 || v.dots != 12 || (v.connects != 6 && v.connects != 8))
 		return (1);
 	return (0);
 }

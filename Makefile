@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: marvin <marvin@student.42.fr>              +#+  +:+       +#+         #
+#    By: hcaterpi <hcaterpi@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/09/26 14:40:19 by htrent            #+#    #+#              #
-#    Updated: 2019/09/28 13:38:26 by marvin           ###   ########.fr        #
+#    Updated: 2019/10/19 14:23:08 by hcaterpi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,16 +18,17 @@ SRCS =	fillit.c \
 		funcs.c \
 		input.c \
 		list.c \
-		field.c
+		field.c \
+		shift.c \
+		solve.c
 
 OBJS = $(SRCS:.c=.o)
 
 
 all: $(NAME)
-	./fillit file
 
 $(NAME): $(OBJS)
-		gcc -Wall -Wextra -Werror -o $(NAME) $^				-lm
+		gcc -Wall -Wextra -Werror -o $(NAME) $^
 
 $(OBJS): %.o : %.c fillit.h
 		gcc -Wall -Wextra -Werror -I . -c $<

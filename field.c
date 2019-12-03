@@ -12,20 +12,20 @@
 
 #include "fillit.h"
 
-int		**ft_init_field(int n)
+char	**ft_init_field(int n)
 {
-	int **field;
-	int i;
-	int j;
+	char	**field;
+	int		i;
+	int		j;
 
 	i = -1;
 	j = 0;
-	field = (int **)malloc(sizeof(int *) * n);
+	field = (char **)malloc(sizeof(char *) * n);
 	if (!field)
 		return (NULL);
 	while (++i < n)
 	{
-		field[i] = (int *)malloc(sizeof(int) * n);
+		field[i] = (char *)malloc(sizeof(char) * n);
 		if (!field[i])
 		{
 			while (i >= 0)
@@ -33,65 +33,37 @@ int		**ft_init_field(int n)
 			return (NULL);
 		}
 		while (j < n)
-			field[i][j++] = 0;
+			field[i][j++] = '.';
 		j = 0;
 	}
 	return (field);
 }
 
-int 	**ft_reinit_field(int **field, int size, int *n)
+int		ft_check_field(char **field, t_list *tetrimino, t_point *p, int n)
 {
-	int **new_field;
-	int i;
-	int j;
+	int	pos;
 
-	i = 0;
-	j = 0;
-	new_field = ft_init_field(size);
-	while (i < *n)
+	pos = -1;
+	if (p->x + tetrimino->max.x > n && p->y + tetrimino->max.y < n)
 	{
-		while (j < *n)
-		{
-			new_field[i][j] = field[i][j];
-			j++;
-		}
-		j = 0;
-		i++;
+		p->y++;
+		p->x = 0;
+		return (-1);
 	}
-	i = 0;
-	while (i < *n)
-		free(field[i++]);
-	free(field);
-	*n = size;
-	return (new_field);
+	if (p->y + tetrimino->max.y >= n ||
+		(p->y + tetrimino->max.y >= n && p->x + tetrimino->max.x >= n))
+		return (2);
+	while (++pos < 4)
+		if (field[p->y + tetrimino->figure[pos][0]]
+			[p->x + tetrimino->figure[pos][1]] != '.')
+		{
+			p->x++;
+			return (0);
+		}
+	return (1);
 }
 
-int		ft_check_field(int **field, char alpha, int i, int j)
-{
-	if ((alpha == 'A' && A(field, i, j) == 0)
-		|| (alpha == 'B' && B(field, i, j) == 0)
-		|| (alpha == 'C' && C(field, i, j) == 0)
-		|| (alpha == 'D' && D(field, i, j) == 0)
-		|| (alpha == 'E' && E(field, i, j) == 0)
-		|| (alpha == 'F' && F(field, i, j) == 0)
-		|| (alpha == 'G' && G(field, i, j) == 0)
-		|| (alpha == 'H' && H(field, i, j) == 0)
-		|| (alpha == 'J' && J(field, i, j) == 0)
-		|| (alpha == 'K' && K(field, i, j) == 0)
-		|| (alpha == 'L' && L(field, i, j) == 0)
-		|| (alpha == 'M' && M(field, i, j) == 0)
-		|| (alpha == 'N' && N(field, i, j) == 0)
-		|| (alpha == 'O' && O(field, i, j) == 0)
-		|| (alpha == 'P' && P(field, i, j) == 0)
-		|| (alpha == 'Q' && Q(field, i, j) == 0)
-		|| (alpha == 'R' && R(field, i, j) == 0)
-		|| (alpha == 'S' && S(field, i, j) == 0)
-		|| (alpha == 'T' && T(field, i, j) == 0))
-			return (1);
-	return (0);
-}
-
-void	ft_print_field(int **field, int n)
+void	ft_print_field(char **field, int n)
 {
 	int i;
 	int j;
@@ -102,8 +74,7 @@ void	ft_print_field(int **field, int n)
 	{
 		while (j < n)
 		{
-			ft_putchar(field[i][j] + '0');
-			ft_putchar(' ');
+			ft_putchar(field[i][j]);
 			j++;
 		}
 		ft_putchar('\n');
@@ -112,7 +83,30 @@ void	ft_print_field(int **field, int n)
 	}
 }
 
-void	ft_free_field(int **field, int n)
+char	**ft_delete_tetrimino(char **field, t_list *tetrimino,
+		t_point *p, int n)
+{
+	p->x = tetrimino->place.x;
+	p->y = tetrimino->place.y;
+	field[tetrimino->figure[0][0] + tetrimino->place.y]
+	[tetrimino->figure[0][1] + tetrimino->place.x] = '.';
+	field[tetrimino->figure[1][0] + tetrimino->place.y]
+	[tetrimino->figure[1][1] + tetrimino->place.x] = '.';
+	field[tetrimino->figure[2][0] + tetrimino->place.y]
+	[tetrimino->figure[2][1] + tetrimino->place.x] = '.';
+	field[tetrimino->figure[3][0] + tetrimino->place.y]
+	[tetrimino->figure[3][1] + tetrimino->place.x] = '.';
+	if (p->x >= n - 1)
+	{
+		p->x = 0;
+		p->y++;
+	}
+	else
+		p->x++;
+	return (field);
+}
+
+void	ft_free_field(char **field, int n)
 {
 	int i;
 

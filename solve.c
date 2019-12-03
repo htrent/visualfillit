@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "fillit.h"
+#include <stdio.h>
 
 char	**ft_fill(t_list *tetrimino, char **field, t_point *p)
 {
@@ -50,6 +51,8 @@ int		ft_fill_field(t_list *tetrimino, char **field, int n, t_point p)
 		if (check == 1)
 		{
 			field = ft_fill(tetrimino, field, &p);
+			getchar();
+			ft_print_field(field, n);
 			if (tetrimino->next == NULL)
 				return (1);
 			tetrimino = tetrimino->next;
